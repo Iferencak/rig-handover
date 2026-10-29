@@ -20,10 +20,19 @@ export function createApp(config: RigConfig = loadConfig()) {
     ),
   );
 
+  // the regex is the path-traversal guard: only a bare date reaches the filesystem
+  const load = (id: string) =>
+    /^\d{4}-\d{2}-\d{2}$/.test(id) ? readNight(config.runsDir, id) : null;
+
+  app.get('/api/digest/:night', (c) => {
+    const id = c.req.param('night');
+    const night = load(id);
+    return night ? c.json(night) : c.json({ error: 'no run log', night: id }, 404);
+  });
+
   app.get('/digest/:night', (c) => {
     const id = c.req.param('night');
-    // the regex is the path-traversal guard: only a bare date reaches the filesystem
-    const night = /^\d{4}-\d{2}-\d{2}$/.test(id) ? readNight(config.runsDir, id) : null;
+    const night = load(id);
     if (!night) {
       return c.html(
         <Layout title={`digest ${id}`} lane={lane()}>
