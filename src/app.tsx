@@ -12,13 +12,17 @@ export function createApp(config: RigConfig = loadConfig()) {
 
   app.get('/health', (c) => c.json({ ok: true, lane: lane().id }));
 
-  app.get('/', (c) =>
-    c.html(
+  app.get('/', (c) => {
+    const status = readStatus(config);
+    const counts = Object.fromEntries(
+      status.nights.map((n) => [n, readNight(config.runsDir, n)?.counts]),
+    );
+    return c.html(
       <Layout title="status" lane={lane()}>
-        <StatusBoard status={readStatus(config)} />
+        <StatusBoard status={status} counts={counts} />
       </Layout>,
-    ),
-  );
+    );
+  });
 
   // the regex is the path-traversal guard: only a bare date reaches the filesystem
   const load = (id: string) =>

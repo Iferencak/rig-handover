@@ -5,6 +5,7 @@ describe('readNight', () => {
   it('reads 2026-10-28: 5 jobs, 1 bad line', () => {
     const n = readNight('runs', '2026-10-28')!;
     expect(n.badLines).toBe(1);
+    expect(n.counts).toEqual({ ok: 10, retry: 4, fail: 1 });
     expect(n.rows.map((r) => r.job)).toEqual(['digest/render', 'fixtures/refresh', 'lane/sync', 'notes/backup', 'rig/rotate-logs']);
     const fx = n.rows.find((r) => r.job === 'fixtures/refresh')!;
     expect(fx).toMatchObject({ runs: 4, retries: 3, lastStatus: 'ok', lastError: null, firstAt: '2026-10-29T01:30:00+01:00', lastAt: '2026-10-29T01:37:00+01:00' });
